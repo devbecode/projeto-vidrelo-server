@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  product:
+    build: .
+    container_name: product
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: [ "npm", "run", "start:prod" ]
+    env_file:
+      - .env
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}

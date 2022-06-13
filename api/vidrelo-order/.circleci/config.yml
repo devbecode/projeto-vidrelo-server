@@ -1,0 +1,213 @@
+version: 2.1
+
+base_config: &base_config
+  docker:
+    - image: cimg/node:14.17.0
+  working_directory: ~/project
+
+orbs:
+  aws-cli: circleci/aws-cli@2.0.6
+  aws-ecr: circleci/aws-ecr@6.14.0
+  aws-ecs: circleci/aws-ecs@1.4.0
+
+jobs:
+  config-project-testing-order:
+    <<: *base_config
+    steps:
+      - checkout
+      - run:
+          name: Construindo arquivo .env
+          command: |
+            echo SERVER_PORT=${DEV_SERVER_PORT_ORDER} >> ./vidrelo-order/.env
+            echo SECRET_KEY=${DEV_SECRET_KEY} >> ./vidrelo-order/.env
+            echo COMPANY_ID=${DEV_COMPANY_ID} >> ./vidrelo-order/.env
+            echo DB_TYPE=${DEV_DB_TYPE} >> ./vidrelo-order/.env
+            echo DB_USERNAME=${DEV_DB_USERNAME} >> ./vidrelo-order/.env
+            echo DB_PASSWORD=${DEV_DB_PASSWORD} >> ./vidrelo-order/.env
+            echo DB_HOST=${DEV_DB_HOST} >> ./vidrelo-order/.env
+            echo DB_PORT=${DEV_DB_PORT} >> ./vidrelo-order/.env
+            echo DB_NAME=${DEV_DB_NAME_ORDER} >> ./vidrelo-order/.env
+            echo ORM_PATH=${DEV_ORM_PATH_ORDER} >> ./vidrelo-order/.env
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - ./
+
+  config-project-production-order:
+    <<: *base_config
+    steps:
+      - checkout
+      - run:
+          name: Construindo arquivo .env
+          command: |
+            echo SERVER_PORT=${PROD_SERVER_PORT_ORDER} >> ./vidrelo-order/.env
+            echo SECRET_KEY=${PROD_SECRET_KEY} >> ./vidrelo-order/.env
+            echo COMPANY_ID=${PROD_COMPANY_ID} >> ./vidrelo-order/.env
+            echo DB_TYPE=${PROD_DB_TYPE} >> ./vidrelo-order/.env
+            echo DB_USERNAME=${PROD_DB_USERNAME} >> ./vidrelo-order/.env
+            echo DB_PASSWORD=${PROD_DB_PASSWORD} >> ./vidrelo-order/.env
+            echo DB_HOST=${PROD_DB_HOST} >> ./vidrelo-order/.env
+            echo DB_PORT=${PROD_DB_PORT} >> ./vidrelo-order/.env
+            echo DB_NAME=${PROD_DB_NAME_ORDER} >> ./vidrelo-order/.env
+            echo ORM_PATH=${PROD_ORM_PATH} >> ./vidrelo-order/.env
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - ./
+
+  install-dependencies-npm-order:
+    <<: *base_config
+    environment:
+      CI: "false"
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - restore_cache:
+          keys:
+            # "package.json" can be used if it is committed to the repo
+            - v1-dependencies-{{ checksum "./vidrelo-order/package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+      - run:
+          name: Instalando das dependencias
+          command: cd ./vidrelo-order/ && npm install
+      - save_cache:
+          key: v1-dependencies-{{ checksum "./vidrelo-order/package.json" }}
+          paths:
+            - ./project/vidrelo-order/node_modules
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - ./
+
+  build-push-img-ecr-testing-order:
+    machine:
+      image: ubuntu-2004:current
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - aws-ecr/build-and-push-image:
+          account-url: DEV_AWS_ECR_ACCOUNT_URL
+          aws-access-key-id: DEV_AWS_ACCESS_KEY_ID
+          aws-secret-access-key: DEV_AWS_SECRET_ACCESS_KEY
+          region: DEV_AWS_REGION
+          repo: "${DEV_SERVICE_NAME_ORDER}"
+          path: ~/project/vidrelo-order
+
+  build-push-img-ecr-production-order:
+    machine:
+      image: ubuntu-2004:current
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - aws-ecr/build-and-push-image:
+          account-url: PROD_AWS_ECR_ACCOUNT_URL
+          aws-access-key-id: PROD_AWS_ACCESS_KEY_ID
+          aws-secret-access-key: PROD_AWS_SECRET_ACCESS_KEY
+          region: PROD_AWS_REGION
+          repo: "${PROD_SERVICE_NAME_ORDER}"
+          path: ~/project/vidrelo-order
+
+  aws-container-deploy-testing-order:
+    executor: aws-cli/default
+    steps:
+      - aws-cli/setup:
+          aws-region: DEV_AWS_REGION
+          aws-access-key-id: DEV_AWS_ACCESS_KEY_ID
+          aws-secret-access-key: DEV_AWS_SECRET_ACCESS_KEY
+      - aws-ecs/update-service:
+          family: "${DEV_SERVICE_NAME_ORDER}"
+          cluster-name: "${DEV_AWS_CLUSTER_NAME_ARN}"
+          container-image-name-updates: "container=${DEV_SERVICE_NAME_ORDER},tag=latest"
+
+  aws-container-deploy-production-order:
+    executor: aws-cli/default
+    steps:
+      - aws-cli/setup:
+          aws-region: PROD_AWS_REGION
+          aws-access-key-id: PROD_AWS_ACCESS_KEY_ID
+          aws-secret-access-key: PROD_AWS_SECRET_ACCESS_KEY
+      - aws-ecs/update-service:
+          family: "${PROD_SERVICE_NAME_ORDER}"
+          cluster-name: "${PROD_AWS_CLUSTER_NAME_ARN}"
+          container-image-name-updates: "container=${PROD_SERVICE_NAME_ORDER},tag=latest"
+
+  sonar-analyze:
+    <<: *base_config
+    steps:
+      - run:
+          name: Sonar analysis
+          command: |
+            curl --header "Authorization:token $GITHUB_USER_TOKEN" --header "Accept:application/vnd.github.v3.raw" --remote-name --location https://api.github.com/repos/sambatech/webops/contents/devops/circle-ci/run-sonar.sh
+            chmod a+x run-sonar.sh
+            ./run-sonar.sh install
+            rm sonar-scanner-3.2.0.1227-linux/jre/Welcome.html
+            ./run-sonar.sh run
+workflows:
+  optional-deploy-testing-order:
+    jobs:
+      - approval-optional-deploy-order:
+          type: approval
+          filters:
+            branches:
+              ignore:
+                - main
+                - dev
+      - config-project-testing-order:
+          requires:
+            - approval-optional-deploy-order
+      - install-dependencies-npm-order:
+          requires:
+            - config-project-testing-order
+      - sonar-analyze:
+          context: sonar
+          requires:
+            - install-dependencies-npm-order
+      - build-push-img-ecr-testing-order:
+          requires:
+            - sonar-analyze
+      - aws-container-deploy-testing-order:
+          requires:
+            - build-push-img-ecr-testing-order
+
+  build-deploy-testing-order:
+    jobs:
+      - config-project-testing-order:
+          filters:
+            branches:
+              only:
+                - dev
+      - install-dependencies-npm-order:
+          requires:
+            - config-project-testing-order
+      - sonar-analyze:
+          context: sonar
+          requires:
+            - install-dependencies-npm-order
+      - build-push-img-ecr-testing-order:
+          requires:
+            - sonar-analyze
+      - aws-container-deploy-testing-order:
+          requires:
+            - build-push-img-ecr-testing-order
+
+  build-deploy-production-order:
+    jobs:
+      - config-project-production-order:
+          filters:
+            branches:
+              only:
+                - main
+      - install-dependencies-npm-order:
+          requires:
+            - config-project-production-order
+      - sonar-analyze:
+          context: sonar
+          requires:
+            - install-dependencies-npm-order
+      - build-push-img-ecr-production-order:
+          requires:
+            - sonar-analyze
+      - aws-container-deploy-production-order:
+          requires:
+            - build-push-img-ecr-production-order
