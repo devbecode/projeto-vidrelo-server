@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  mail:
+    build: .
+    container_name: mail-sender
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: [ "npm", "run", "start:prod" ]
+    env_file:
+      - .env
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}

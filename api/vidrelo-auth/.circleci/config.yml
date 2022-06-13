@@ -1,0 +1,217 @@
+version: 2.1
+
+base_config: &base_config
+  docker:
+    - image: cimg/node:14.17.0
+  working_directory: ~/project
+
+orbs:
+  aws-cli: circleci/aws-cli@2.0.6
+  aws-ecr: circleci/aws-ecr@6.14.0
+  aws-ecs: circleci/aws-ecs@1.4.0
+
+jobs:
+  config-project-testing-auth:
+    <<: *base_config
+    steps:
+      - checkout
+      - run:
+          name: Construindo arquivo .env
+          command: |
+            echo SERVER_PORT=${DEV_SERVER_PORT_AUTH} >> ./vidrelo-auth/.env
+            echo SECRET_KEY=${DEV_SECRET_KEY} >> ./vidrelo-auth/.env
+            echo COMPANY_ID=${DEV_COMPANY_ID} >> ./vidrelo-auth/.env
+            echo DB_TYPE=${DEV_DB_TYPE} >> ./vidrelo-auth/.env
+            echo DB_USERNAME=${DEV_DB_USERNAME} >> ./vidrelo-auth/.env
+            echo DB_PASSWORD=${DEV_DB_PASSWORD} >> ./vidrelo-auth/.env
+            echo DB_HOST=${DEV_DB_HOST} >> ./vidrelo-auth/.env
+            echo DB_PORT=${DEV_DB_PORT} >> ./vidrelo-auth/.env
+            echo DB_NAME=${DEV_DB_NAME_AUTH} >> ./vidrelo-auth/.env
+            echo AWS_REGION=${DEV_AWS_REGION} >> ./vidrelo-auth/.env
+            echo AWS_SECRET_ACCESS_KEY=${DEV_AWS_SECRET_ACCESS_KEY} >> ./vidrelo-auth/.env
+            echo AWS_ACCESS_KEY_ID=${DEV_AWS_ACCESS_KEY_ID} >> ./vidrelo-auth/.env
+            echo AWS_SES_DEFAULT_MAIL=${DEV_AWS_SES_DEFAULT_MAIL} >> ./vidrelo-auth/.env
+            echo QUEUE_PROVIDER=${DEV_QUEUE_PROVIDER} >> ./vidrelo-auth/.env
+            echo ORM_PATH=${DEV_ORM_PATH} >> ./vidrelo-auth/.env
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - ./
+
+  config-project-production-auth:
+    <<: *base_config
+    steps:
+      - checkout
+      - run:
+          name: Construindo arquivo .env
+          command: |
+            echo SERVER_PORT=${PROD_SERVER_PORT_AUTH} >> ./vidrelo-auth/.env
+            echo SECRET_KEY=${PROD_SECRET_KEY} >> ./vidrelo-auth/.env
+            echo COMPANY_ID=${PROD_COMPANY_ID} >> ./vidrelo-auth/.env
+            echo DB_TYPE=${PROD_DB_TYPE} >> ./vidrelo-auth/.env
+            echo DB_USERNAME=${PROD_DB_USERNAME} >> ./vidrelo-auth/.env
+            echo DB_PASSWORD=${PROD_DB_PASSWORD} >> ./vidrelo-auth/.env
+            echo DB_HOST=${PROD_DB_HOST} >> ./vidrelo-auth/.env
+            echo DB_PORT=${PROD_DB_PORT} >> ./vidrelo-auth/.env
+            echo DB_NAME=${PROD_DB_NAME_AUTH} >> ./vidrelo-auth/.env
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - ./
+
+  install-dependencies-npm-auth:
+    <<: *base_config
+    environment:
+      CI: "false"
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - restore_cache:
+          keys:
+            # "package.json" can be used if it is committed to the repo
+            - v1-dependencies-{{ checksum "./vidrelo-auth/package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+      - run:
+          name: Instalando das dependencias
+          command: cd ./vidrelo-auth/ && npm install
+      - save_cache:
+          key: v1-dependencies-{{ checksum "./vidrelo-auth/package.json" }}
+          paths:
+            - ./project/vidrelo-auth/node_modules
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - ./
+
+  build-push-img-ecr-testing-auth:
+    machine:
+      image: ubuntu-2004:current
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - aws-ecr/build-and-push-image:
+          account-url: DEV_AWS_ECR_ACCOUNT_URL
+          aws-access-key-id: DEV_AWS_ACCESS_KEY_ID
+          aws-secret-access-key: DEV_AWS_SECRET_ACCESS_KEY
+          region: DEV_AWS_REGION
+          repo: "${DEV_SERVICE_NAME_AUTH}"
+          path: ~/project/vidrelo-auth
+
+  build-push-img-ecr-production-auth:
+    machine:
+      image: ubuntu-2004:current
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - aws-ecr/build-and-push-image:
+          account-url: PROD_AWS_ECR_ACCOUNT_URL
+          aws-access-key-id: PROD_AWS_ACCESS_KEY_ID
+          aws-secret-access-key: PROD_AWS_SECRET_ACCESS_KEY
+          region: PROD_AWS_REGION
+          repo: "${PROD_SERVICE_NAME_AUTH}"
+          path: ~/project/vidrelo-auth
+
+  aws-container-deploy-testing-auth:
+    executor: aws-cli/default
+    steps:
+      - aws-cli/setup:
+          aws-region: DEV_AWS_REGION
+          aws-access-key-id: DEV_AWS_ACCESS_KEY_ID
+          aws-secret-access-key: DEV_AWS_SECRET_ACCESS_KEY
+      - aws-ecs/update-service:
+          family: "${DEV_SERVICE_NAME_AUTH}"
+          cluster-name: "${DEV_AWS_CLUSTER_NAME_ARN}"
+          container-image-name-updates: "container=${DEV_SERVICE_NAME_AUTH},tag=latest"
+
+  aws-container-deploy-production-auth:
+    executor: aws-cli/default
+    steps:
+      - aws-cli/setup:
+          aws-region: PROD_AWS_REGION
+          aws-access-key-id: PROD_AWS_ACCESS_KEY_ID
+          aws-secret-access-key: PROD_AWS_SECRET_ACCESS_KEY
+      - aws-ecs/update-service:
+          family: "${PROD_SERVICE_NAME_AUTH}"
+          cluster-name: "${PROD_AWS_CLUSTER_NAME_ARN}"
+          container-image-name-updates: "container=${PROD_SERVICE_NAME_AUTH},tag=latest"
+
+  sonar-analyze:
+    <<: *base_config
+    steps:
+      - run:
+          name: Sonar analysis
+          command: |
+            curl --header "Authorization:token $GITHUB_USER_TOKEN" --header "Accept:application/vnd.github.v3.raw" --remote-name --location https://api.github.com/repos/sambatech/webops/contents/devops/circle-ci/run-sonar.sh
+            chmod a+x run-sonar.sh
+            ./run-sonar.sh install
+            rm sonar-scanner-3.2.0.1227-linux/jre/Welcome.html
+            ./run-sonar.sh run
+workflows:
+  optional-deploy-testing-auth:
+    jobs:
+      - approval-optional-deploy-auth:
+          type: approval
+          filters:
+            branches:
+              ignore:
+                - main
+                - dev
+      - config-project-testing-auth:
+          requires:
+            - approval-optional-deploy-auth
+      - install-dependencies-npm-auth:
+          requires:
+            - config-project-testing-auth
+      - sonar-analyze:
+          context: sonar
+          requires:
+            - install-dependencies-npm-auth
+      - build-push-img-ecr-testing-auth:
+          requires:
+            - sonar-analyze
+      - aws-container-deploy-testing-auth:
+          requires:
+            - build-push-img-ecr-testing-auth
+
+  build-deploy-testing-auth:
+    jobs:
+      - config-project-testing-auth:
+          filters:
+            branches:
+              only:
+                - dev
+      - install-dependencies-npm-auth:
+          requires:
+            - config-project-testing-auth
+      - sonar-analyze:
+          context: sonar
+          requires:
+            - install-dependencies-npm-auth
+      - build-push-img-ecr-testing-auth:
+          requires:
+            - sonar-analyze
+      - aws-container-deploy-testing-auth:
+          requires:
+            - build-push-img-ecr-testing-auth
+
+  build-deploy-production-auth:
+    jobs:
+      - config-project-production-auth:
+          filters:
+            branches:
+              only:
+                - main
+      - install-dependencies-npm-auth:
+          requires:
+            - config-project-production-auth
+      - sonar-analyze:
+          context: sonar
+          requires:
+            - install-dependencies-npm-auth
+      - build-push-img-ecr-production-auth:
+          requires:
+            - sonar-analyze
+      - aws-container-deploy-production-auth:
+          requires:
+            - build-push-img-ecr-production-auth

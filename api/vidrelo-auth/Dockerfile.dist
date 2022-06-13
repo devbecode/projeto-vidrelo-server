@@ -1,0 +1,26 @@
+FROM node:14 as runtime
+
+# RUN useradd --user-group --create-home --shell /bin/false app
+
+# ENV HOME=/home/app
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
+
+WORKDIR /app
+
+COPY package*.json ./
+
+# RUN chown -R app:app $HOME
+
+# USER app
+RUN npm install
+# RUN npm run build
+
+# USER root
+COPY . .
+# RUN chown -R app:app $HOME
+# USER app
+
+EXPOSE 3000
+
+CMD ["npm", "run", "start:dev"]

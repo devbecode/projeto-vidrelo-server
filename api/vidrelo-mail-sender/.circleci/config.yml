@@ -1,0 +1,224 @@
+version: 2.1
+
+base_config: &base_config
+  docker:
+    - image: cimg/node:14.17.0
+  working_directory: ~/project
+
+orbs:
+  aws-cli: circleci/aws-cli@2.0.6
+  aws-ecr: circleci/aws-ecr@6.14.0
+  aws-ecs: circleci/aws-ecs@1.4.0
+
+jobs:
+  config-project-testing-mail-sender:
+    <<: *base_config
+    steps:
+      - checkout
+      - run:
+          name: Construindo arquivo .env
+          command: |
+            echo SERVER_PORT=${DEV_SERVER_PORT_MAIL} >> ./vidrelo-mail-sender/.env
+            echo MAIL_PROVIDER=${DEV_MAIL_PROVIDER} >> ./vidrelo-mail-sender/.env
+            echo SECRET_KEY=${DEV_SECRET_KEY} >> ./vidrelo-mail-sender/.env
+            echo HOST=${DEV_HOST} >> ./vidrelo-mail-sender/.env
+            echo SES_USER=${DEV_SES_USER} >> ./vidrelo-mail-sender/.env
+            echo SES_PASS=${DEV_SES_PASS} >> ./vidrelo-mail-sender/.env
+            echo SES_HOST=${DEV_SES_HOST} >> ./vidrelo-mail-sender/.env
+            echo SES_PORT=${DEV_SES_PORT} >> ./vidrelo-mail-sender/.env
+            echo GMAIL_HOST=${DEV_GMAIL_HOST} >> ./vidrelo-mail-sender/.env
+            echo GMAIL_PORT=${DEV_GMAIL_PORT} >> ./vidrelo-mail-sender/.env
+            echo GMAIL_USER=${DEV_GMAIL_USER} >> ./vidrelo-mail-sender/.env
+            echo GMAIL_PASS=${DEV_GMAIL_PASS} >> ./vidrelo-mail-sender/.env
+            echo AWS_REGION=${DEV_AWS_REGION} >> ./vidrelo-mail-sender/.env
+            echo AWS_SECRET_ACCESS_KEY=${DEV_AWS_SECRET_ACCESS_KEY} >> ./vidrelo-mail-sender/.env
+            echo AWS_ACCESS_KEY_ID=${DEV_AWS_ACCESS_KEY_ID} >> ./vidrelo-mail-sender/.env
+            echo AWS_SES_DEFAULT_MAIL=${DEV_AWS_SES_DEFAULT_MAIL} >> ./vidrelo-mail-sender/.env
+            echo AWS_QUEUE_SES_URL=${DEV_AWS_QUEUE_SES_URL} >> ./vidrelo-mail-sender/.env
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - ./
+
+  config-project-production-mail-sender:
+    <<: *base_config
+    steps:
+      - checkout
+      - run:
+          name: Construindo arquivo .env
+          command: |
+            echo SERVER_PORT=${PROD_SERVER_PORT_MAIL} >> ./vidrelo-mail-sender/.env
+            echo MAIL_PROVIDER=${PROD_MAIL_PROVIDER} >> ./vidrelo-mail-sender/.env
+            echo SECRET_KEY=${PROD_SECRET_KEY} >> ./vidrelo-mail-sender/.env
+            echo HOST=${PROD_HOST} >> ./vidrelo-mail-sender/.env
+            echo SES_USER=${PROD_SES_USER} >> ./vidrelo-mail-sender/.env
+            echo SES_PASS=${PROD_SES_PASS} >> ./vidrelo-mail-sender/.env
+            echo SES_HOST=${PROD_SES_HOST} >> ./vidrelo-mail-sender/.env
+            echo SES_PORT=${PROD_SES_PORT} >> ./vidrelo-mail-sender/.env
+            echo GMAIL_HOST=${PROD_GMAIL_HOST} >> ./vidrelo-mail-sender/.env
+            echo GMAIL_PORT=${PROD_GMAIL_PORT} >> ./vidrelo-mail-sender/.env
+            echo GMAIL_USER=${PROD_GMAIL_USER} >> ./vidrelo-mail-sender/.env
+            echo GMAIL_PASS=${PROD_GMAIL_PASS} >> ./vidrelo-mail-sender/.env
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - ./
+
+  install-dependencies-npm-mail-sender:
+    <<: *base_config
+    environment:
+      CI: "false"
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - restore_cache:
+          keys:
+            # "package.json" can be used if it is committed to the repo
+            - v1-dependencies-{{ checksum "./vidrelo-mail-sender/package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+      - run:
+          name: Instalando das dependencias
+          command: cd ./vidrelo-mail-sender/ && npm install
+      - save_cache:
+          key: v1-dependencies-{{ checksum "./vidrelo-mail-sender/package.json" }}
+          paths:
+            - ./project/vidrelo-mail-sender/node_modules
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - ./
+
+  build-push-img-ecr-testing-mail-sender:
+    machine:
+      image: ubuntu-2004:current
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - aws-ecr/build-and-push-image:
+          checkout: false
+          account-url: DEV_AWS_ECR_ACCOUNT_URL
+          aws-access-key-id: DEV_AWS_ACCESS_KEY_ID
+          aws-secret-access-key: DEV_AWS_SECRET_ACCESS_KEY
+          region: DEV_AWS_REGION
+          repo: "${DEV_SERVICE_NAME_MAIL}"
+          path: ~/project/vidrelo-mail-sender
+
+  build-push-img-ecr-production-mail-sender:
+    machine:
+      image: ubuntu-2004:current
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - aws-ecr/build-and-push-image:
+          checkout: false
+          account-url: PROD_AWS_ECR_ACCOUNT_URL
+          aws-access-key-id: PROD_AWS_ACCESS_KEY_ID
+          aws-secret-access-key: PROD_AWS_SECRET_ACCESS_KEY
+          region: PROD_AWS_REGION
+          repo: "${PROD_SERVICE_NAME_MAIL}"
+          path: ~/project/vidrelo-mail-sender
+
+  aws-container-deploy-testing-mail-sender:
+    executor: aws-cli/default
+    steps:
+      - aws-cli/setup:
+          aws-region: DEV_AWS_REGION
+          aws-access-key-id: DEV_AWS_ACCESS_KEY_ID
+          aws-secret-access-key: DEV_AWS_SECRET_ACCESS_KEY
+      - aws-ecs/update-service:
+          family: "${DEV_SERVICE_NAME_MAIL}"
+          cluster-name: "${DEV_AWS_CLUSTER_NAME_ARN}"
+          container-image-name-updates: "container=${DEV_SERVICE_NAME_MAIL},tag=latest"
+
+  aws-container-deploy-production-mail-sender:
+    executor: aws-cli/default
+    steps:
+      - aws-cli/setup:
+          aws-region: PROD_AWS_REGION
+          aws-access-key-id: PROD_AWS_ACCESS_KEY_ID
+          aws-secret-access-key: PROD_AWS_SECRET_ACCESS_KEY
+      - aws-ecs/update-service:
+          family: "${PROD_SERVICE_NAME_MAIL}"
+          cluster-name: "${PROD_AWS_CLUSTER_NAME_ARN}"
+          container-image-name-updates: "container=${PROD_SERVICE_NAME_MAIL},tag=latest"
+
+  sonar-analyze:
+    <<: *base_config
+    steps:
+      - run:
+          name: Sonar analysis
+          command: |
+            curl --header "Authorization:token $GITHUB_USER_TOKEN" --header "Accept:application/vnd.github.v3.raw" --remote-name --location https://api.github.com/repos/sambatech/webops/contents/devops/circle-ci/run-sonar.sh
+            chmod a+x run-sonar.sh
+            ./run-sonar.sh install
+            rm sonar-scanner-3.2.0.1227-linux/jre/Welcome.html
+            ./run-sonar.sh run
+workflows:
+  optional-deploy-testing-mail-sender:
+    jobs:
+      - approval-optional-deploy-mail-sender:
+          type: approval
+          filters:
+            branches:
+              ignore:
+                - main
+                - dev
+      - config-project-testing-mail-sender:
+          requires:
+            - approval-optional-deploy-mail-sender
+      - install-dependencies-npm-mail-sender:
+          requires:
+            - config-project-testing-mail-sender
+      - sonar-analyze:
+          context: sonar
+          requires:
+            - install-dependencies-npm-mail-sender
+      - build-push-img-ecr-testing-mail-sender:
+          requires:
+            - sonar-analyze
+      - aws-container-deploy-testing-mail-sender:
+          requires:
+            - build-push-img-ecr-testing-mail-sender
+
+  build-deploy-testing-mail-sender:
+    jobs:
+      - config-project-testing-mail-sender:
+          filters:
+            branches:
+              only:
+                - dev
+      - install-dependencies-npm-mail-sender:
+          requires:
+            - config-project-testing-mail-sender
+      - sonar-analyze:
+          context: sonar
+          requires:
+            - install-dependencies-npm-mail-sender
+      - build-push-img-ecr-testing-mail-sender:
+          requires:
+            - sonar-analyze
+      - aws-container-deploy-testing-mail-sender:
+          requires:
+            - build-push-img-ecr-testing-mail-sender
+
+  build-deploy-production-mail-sender:
+    jobs:
+      - config-project-production-mail-sender:
+          filters:
+            branches:
+              only:
+                - main
+      - install-dependencies-npm-mail-sender:
+          requires:
+            - config-project-production-mail-sender
+      - sonar-analyze:
+          context: sonar
+          requires:
+            - install-dependencies-npm-mail-sender
+      - build-push-img-ecr-production-mail-sender:
+          requires:
+            - sonar-analyze
+      - aws-container-deploy-production-mail-sender:
+          requires:
+            - build-push-img-ecr-production-mail-sender
