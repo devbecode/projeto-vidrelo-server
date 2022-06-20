@@ -1,0 +1,17 @@
+{
+  "type": "DATABASE_TYPE",
+  "host": "DATABASE_HOST",
+  "port": 12345,
+  "username": "DATABASE_USERNAME",
+  "password": "DATABASE_PASSWORD",
+  "database": "DATABASE_NAME",
+  "entities": [
+    "./src/modules/**/typeorm/entities/*.ts"
+  ],
+  "migrations": [
+    "./src/shared/typeorm/migrations/*.ts"
+  ],
+  "cli": {
+    "migrationsDir": "./src/shared/typeorm/migrations"
+  }
+}
