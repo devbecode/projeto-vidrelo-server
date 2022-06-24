@@ -1,0 +1,460 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API Vidrelo User",
+    "description": "This API only manipulate user data through C.R.U.D.",
+    "termsOfService": "N/A terms of service(Must be an URL)",
+    "contact": {
+      "name": "N/A contact name",
+      "url": "N/A contact url",
+      "email": "N/A contact email"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3005/v1",
+      "description": "API test"
+    }
+  ],
+  "paths": {
+    "/user": {
+      "post": {
+        "summary": "User registration",
+        "description": "This route will be responsable for creating the user. *See others examples",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRequestToCreate"
+              },
+              "examples": {
+                "minimun example insert user employee": {
+                  "value": {
+                    "email": "felipeluiz2@gmail.com",
+                    "telephone": "31933745679",
+                    "profile": "employee"
+                  }
+                },
+                "minimun example insert user client": {
+                  "value": {
+                    "name": "Peter",
+                    "email": "felipeluiz2@gmail.com",
+                    "telephone": "31933745679",
+                    "profile": "client",
+                    "password": "123456"
+                  }
+                },
+                "full example insert user": {
+                  "value": {
+                    "name": "Fulano Ciclano",
+                    "email": "fulanociclano2@gmail.com",
+                    "telephone": "31933745679",
+                    "profile": "employee",
+                    "cep": "31035-342",
+                    "state": "MG",
+                    "district": "N/A",
+                    "street": "Tereza Cristina",
+                    "number": "289",
+                    "complement": "Nice House",
+                    "city": "Belo Horizonte"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User creation was a sucess!",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/UserResponseCreatedSucess"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/{userId}": {
+      "get": {
+        "summary": "Listing specific user",
+        "description": "This route will be responsable for listing a specific user.",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "Getting user info by ID."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User was successfully selected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/UserResponseToListById"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Updating specific user",
+        "description": "This route will be responsable for updating a specific user.",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "Updating user by ID."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/asdfasdfsdafds"
+              },
+              "examples": {
+                "user": {
+                  "value": {
+                    "name": "Felipe Luiz",
+                    "email": "felipeluiz2@gmail.com",
+                    "telephone": "31933745679",
+                    "profile": "employee"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User was successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/UserResponseToListById"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deleting specific user",
+        "description": "This route will be responsable for deleting a specific user.",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "description": "Deleting user by ID."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User was successfully selected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/UserResponseToListById"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "summary": "Listing all users by profile",
+        "description": "This route will be responsable for listing all users by profile.",
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "profile",
+            "required": true,
+            "description": "Getting all users by profile."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User was successfully selected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/UserResponseToListById"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/first-password": {
+      "post": {
+        "summary": "Change user password",
+        "description": "This route will be responsable for changing the user password.",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeUserPasswordResquest"
+              },
+              "examples": {
+                "user password update": {
+                  "value": {
+                    "user_id": "here should be an uuid",
+                    "password": "123456",
+                    "user_email": "user@gmail.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User password alteration was a sucess!",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/ChangeUserPasswordResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserRequestToCreate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "telephone": {
+            "type": "string"
+          },
+          "profile": {
+            "type": "string"
+          },
+          "cep": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "district": {
+            "type": "string"
+          },
+          "street": {
+            "type": "string"
+          },
+          "number": {
+            "type": "string"
+          },
+          "complement": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          }
+        }
+      },
+      "UserResponseCreatedSucess": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "number"
+          },
+          "profile": {
+            "type": "string"
+          },
+          "salt": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "telephone": {
+            "type": "string"
+          },
+          "first_password": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          }
+        }
+      },
+      "UserResponseToListById": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "first_password": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "profile": {
+            "type": "string"
+          },
+          "salt": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "telephone": {
+            "type": "string"
+          },
+          "cep": {
+            "type": null
+          },
+          "state": {
+            "type": null
+          },
+          "city": {
+            "type": null
+          },
+          "district": {
+            "type": null
+          },
+          "street": {
+            "type": null
+          },
+          "number": {
+            "type": null
+          },
+          "complement": {
+            "type": null
+          },
+          "created_at": {
+            "type": "string"
+          }
+        }
+      },
+      "UserResponeToListByProfile": {
+        "type": "object",
+        "metaData": {
+          "type": "object",
+          "total": {
+            "type": "number"
+          }
+        },
+        "users": {
+          "type": "array"
+        }
+      },
+      "ChangeUserPasswordResquest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "telephone": {
+            "type": "string"
+          }
+        }
+      },
+      "ChangeUserPasswordResponse": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearer": "JWT"
+      }
+    }
+  }
+}
