@@ -39,6 +39,7 @@
               "examples": {
                 "minimun example insert user employee": {
                   "value": {
+                    "name": "Felipe Luiz",
                     "email": "felipeluiz2@gmail.com",
                     "telephone": "31933745679",
                     "profile": "employee"
@@ -114,7 +115,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "$ref": "#/components/schemas/UserResponseToListById"
+                  "$ref": "#/components/schemas/UserResponseById"
                 }
               }
             }
@@ -144,15 +145,30 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/asdfasdfsdafds"
+                "$ref": "#/components/schemas/UserRequestUpdateById"
               },
               "examples": {
-                "user": {
+                "minimun user update": {
                   "value": {
                     "name": "Felipe Luiz",
                     "email": "felipeluiz2@gmail.com",
                     "telephone": "31933745679",
                     "profile": "employee"
+                  }
+                },
+                "full user update": {
+                  "value": {
+                    "name": "Felipe Luiz",
+                    "telephone": "31933745679",
+                    "profile": "employee",
+                    "password": "string",
+                    "cep": "string",
+                    "state": "string",
+                    "city": "string",
+                    "district": "string",
+                    "street": "string",
+                    "number": "string",
+                    "complement": "string"
                   }
                 }
               }
@@ -166,7 +182,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "$ref": "#/components/schemas/UserResponseToListById"
+                  "$ref": "#/components/schemas/UserResponseById"
                 }
               }
             }
@@ -199,7 +215,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "$ref": "#/components/schemas/UserResponseToListById"
+                  "$ref": "#/components/schemas/UserResponseById"
                 }
               }
             }
@@ -234,7 +250,7 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "$ref": "#/components/schemas/UserResponseToListById"
+                  "$ref": "#/components/schemas/UserResponseById"
                 }
               }
             }
@@ -333,7 +349,7 @@
             "type": "string"
           },
           "name": {
-            "type": "number"
+            "type": "string"
           },
           "profile": {
             "type": "string"
@@ -358,7 +374,7 @@
           }
         }
       },
-      "UserResponseToListById": {
+      "UserResponseById": {
         "type": "object",
         "properties": {
           "id": {
@@ -389,25 +405,25 @@
             "type": "string"
           },
           "cep": {
-            "type": null
+            "type": "string"
           },
           "state": {
-            "type": null
+            "type": "string"
           },
           "city": {
-            "type": null
+            "type": "string"
           },
           "district": {
-            "type": null
+            "type": "string"
           },
           "street": {
-            "type": null
+            "type": "string"
           },
           "number": {
-            "type": null
+            "type": "string"
           },
           "complement": {
-            "type": null
+            "type": "string"
           },
           "created_at": {
             "type": "string"
@@ -444,6 +460,44 @@
         "type": "object",
         "properties": {
           "result": {
+            "type": "string"
+          }
+        }
+      },
+      "UserRequestUpdateById": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "telephone": {
+            "type": "string"
+          },
+          "profile": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "cep": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "district": {
+            "type": "string"
+          },
+          "street": {
+            "type": "string"
+          },
+          "number": {
+            "type": "string"
+          },
+          "complement": {
             "type": "string"
           }
         }
