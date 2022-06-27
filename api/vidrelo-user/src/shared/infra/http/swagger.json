@@ -275,7 +275,7 @@
                 "user password update": {
                   "value": {
                     "user_id": "here should be an uuid",
-                    "password": "123456",
+                    "password": "12345678",
                     "user_email": "user@gmail.com"
                   }
                 }
