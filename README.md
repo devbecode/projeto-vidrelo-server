@@ -14,8 +14,14 @@
   yarn or yarn install
 ```
 
-- Finally you can run locally your API by typing:
+- Now you can run locally your API by typing:
 
 ```bash
   yarn start:dev
+```
+
+- Finally just run the migrations:
+
+```bash
+  yarn typeorm migration:run
 ```
