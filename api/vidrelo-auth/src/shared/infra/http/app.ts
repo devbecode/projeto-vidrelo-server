@@ -9,13 +9,11 @@ import express from 'express';
 
 import { ormCreateConnection } from '../database';
 import { handleError } from './middlewares/error';
-import { queueService } from './middlewares/queue';
 import { router } from './routes/index.router';
 
 const app = express();
 
 ormCreateConnection('default');
-queueService();
 
 app.use(cors({ origin: '*' }));
 
