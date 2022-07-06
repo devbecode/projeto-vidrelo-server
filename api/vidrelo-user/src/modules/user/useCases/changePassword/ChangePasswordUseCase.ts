@@ -5,7 +5,6 @@ import { STATUS_USER, User } from '@modules/user/domain/User';
 import { IChangePasswordDTO } from '@modules/user/dto/UserDTO';
 import { IUserRepository } from '@modules/user/repositories/IUserRepository';
 import { AppError } from '@shared/error/AppError';
-import { SqsProvider, SQS_OPERATIONS } from '@shared/infra/queue/SqsProvider';
 
 @injectable()
 export class ChangePasswordUseCase {
@@ -69,8 +68,6 @@ export class ChangePasswordUseCase {
       MessageGroupId: 'userAuth',
       QueueUrl: process.env.AWS_QUEUE_USER_URL,
     };
-
-    await SqsProvider.sendMessage(sqsOrderData);
   }
 
   public checkIsAbleToChangePassword(): void {

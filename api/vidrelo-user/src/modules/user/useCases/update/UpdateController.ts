@@ -51,6 +51,6 @@ export class UpdateController {
     const updateUseCase = container.resolve(UpdateUseCase);
     await updateUseCase.inactve(id);
 
-    return response.send();
+    return response.json({ result: 'User deleted' });
   }
 }

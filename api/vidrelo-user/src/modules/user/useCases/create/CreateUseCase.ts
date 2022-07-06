@@ -7,7 +7,6 @@ import { STATUS_USER, User, USER_PROFILE } from '@modules/user/domain/User';
 import { ICreateUserDTO } from '@modules/user/dto/UserDTO';
 import { IUserRepository } from '@modules/user/repositories/IUserRepository';
 import { AppError } from '@shared/error/AppError';
-import { SqsProvider, SQS_OPERATIONS } from '@shared/infra/queue/SqsProvider';
 import {
   checkAddress,
   checkEachStringLength,
@@ -56,7 +55,6 @@ export class CreateUseCase {
 
     try {
       await this.repository.save(this.user);
-      await this.sendMessageToQueue();
     } catch (e) {
       console.log(e);
     }
@@ -101,8 +99,6 @@ export class CreateUseCase {
       MessageGroupId: 'userCreate',
       QueueUrl: process.env.AWS_QUEUE_USER_URL,
     };
-
-    await SqsProvider.sendMessage(sqsOrderData);
   }
 
   private async authMessage(): Promise<void> {
@@ -148,8 +144,6 @@ export class CreateUseCase {
       MessageGroupId: 'userAuth',
       QueueUrl: process.env.AWS_QUEUE_USER_URL,
     };
-
-    await SqsProvider.sendMessage(sqsOrderData);
   }
 
   private async messageToEmployeeProfile(): Promise<void> {
@@ -197,8 +191,6 @@ export class CreateUseCase {
       MessageGroupId: 'userMail',
       QueueUrl: process.env.AWS_QUEUE_SES_URL,
     };
-
-    await SqsProvider.sendMessage(sqsOrderData);
   }
 
   private async sendMessageToQueue(): Promise<void> {

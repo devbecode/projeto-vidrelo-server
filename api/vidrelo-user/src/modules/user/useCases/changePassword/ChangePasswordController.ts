@@ -14,6 +14,6 @@ export class ChangePasswordController {
       .resolve(ChangePasswordUseCase)
       .createPassword({ user_id, user_email, newPassword: password });
 
-    return response.send();
+    return response.json({ result: 'Password changed!' });
   }
 }
