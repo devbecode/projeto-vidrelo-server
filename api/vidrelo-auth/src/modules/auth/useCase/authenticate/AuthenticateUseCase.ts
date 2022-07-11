@@ -34,7 +34,7 @@ export class AuthenticateUseCase {
   private checkPassword(inputPassword: string): void {
     if (!compareSync(inputPassword, this.user.password)) {
       throw new AppError(
-        `Your username or password was wrong. Please try again`,
+        `1Your username or password was wrong. Please try again`,
       );
     }
   }

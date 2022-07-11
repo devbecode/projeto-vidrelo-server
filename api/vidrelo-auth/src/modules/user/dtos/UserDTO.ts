@@ -1,9 +1,9 @@
 export interface ICreateUserDTO {
-  id: string;
+  id?: string;
   name: string;
-  status: string;
+  status?: string;
   password: string;
-  created_at: string;
+  created_at?: string;
 }
 
 export interface IChangePassword {
