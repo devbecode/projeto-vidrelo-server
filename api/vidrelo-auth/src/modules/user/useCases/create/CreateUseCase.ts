@@ -1,16 +1,16 @@
-import { inject, injectable } from 'tsyringe';
 import { hashSync } from 'bcrypt';
+import { inject, injectable } from 'tsyringe';
+import { v4 as uuid } from 'uuid';
+
 import { Auth } from '@modules/auth/domain/Auth';
 import { AuthRepository } from '@modules/auth/repositories/AuthRepository';
 import { AuthenticateUseCase } from '@modules/auth/useCase/authenticate/AuthenticateUseCase';
-import { User } from '@modules/user/domain/User';
+import { User, USER_STATUS } from '@modules/user/domain/User';
 import { ICreateUserDTO } from '@modules/user/dtos/UserDTO';
 import { IUserRepository } from '@modules/user/repositories/IUserRepository';
 import { AppError } from '@shared/error/AppError';
 import { UseCase } from '@shared/infra/useCases/UseCase';
-import { v4 as uuid } from 'uuid';
 import { formatDate } from '@shared/utils/utils';
-import { USER_STATUS } from '@modules/user/domain/User';
 
 @injectable()
 export class CreateUseCase extends UseCase {
