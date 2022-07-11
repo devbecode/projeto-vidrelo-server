@@ -40,6 +40,7 @@ export class CreateController {
         name: user.name,
         password: user.password,
       })
+      // eslint-disable-next-line func-names
       .catch(function (error) {
         if (error) {
           console.log(error);
