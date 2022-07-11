@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { container } from 'tsyringe';
-import axios from 'axios';
 import { CreateUseCase } from './CreateUseCase';
 
 export class CreateController {
@@ -35,17 +34,6 @@ export class CreateController {
       complement,
       city,
     });
-    axios
-      .post('http://localhost:3006/v1/auth/createUser/', {
-        name: user.name,
-        password: user.password,
-      })
-      // eslint-disable-next-line func-names
-      .catch(function (error) {
-        if (error) {
-          console.log(error);
-        }
-      });
     return response.json(user);
   }
 }
