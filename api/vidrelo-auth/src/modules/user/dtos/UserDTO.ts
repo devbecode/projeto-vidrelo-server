@@ -1,6 +1,6 @@
 export interface ICreateUserDTO {
   id?: string;
-  name: string;
+  email: string;
   status?: string;
   password: string;
   created_at?: string;

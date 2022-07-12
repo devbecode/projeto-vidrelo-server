@@ -29,13 +29,13 @@ export class CreateUseCase extends UseCase {
     Object.assign(this.user, {
       id: uuid(),
       status: USER_STATUS.ACTIVE,
-      name: newUser.name,
+      email: newUser.email,
       password: newUser.password,
       created_at: formatDate(new Date().toISOString()),
     });
 
     this.encryptPassword();
-    const token = this.firstTimeAccount(newUser.name, newUser.password);
+    const token = this.firstTimeAccount(newUser.email, newUser.password);
     if (!this.user.auth) {
       this.user.auth = token;
     }
@@ -48,16 +48,12 @@ export class CreateUseCase extends UseCase {
     return this.user;
   }
 
-  private firstTimeAccount(name: string, password: string) {
+  private firstTimeAccount(email: string, password: string) {
     const auth = new AuthenticateUseCase(
       new AuthRepository(),
       this.user,
       new Auth(),
     );
-    const user = {
-      username: name,
-      password,
-    };
 
     try {
       return auth.verifyToken();
@@ -93,7 +89,7 @@ export class CreateUseCase extends UseCase {
   }
 
   private async checkIfExists(): Promise<void> {
-    if (await this.repository.findByName(this.user)) {
+    if (await this.repository.findByEmail(this.user)) {
       throw new AppError(`User already exists`);
     }
   }

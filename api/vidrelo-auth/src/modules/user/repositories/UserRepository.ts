@@ -31,9 +31,9 @@ export class UserRepository implements IUserRepository {
     await this.repository.save(user);
   }
 
-  async findByName(user: User): Promise<boolean> {
+  async findByEmail(user: User): Promise<boolean> {
     const record = await this.repository.findOne({
-      where: { name: user.name },
+      where: { email: user.email },
     });
 
     if (!record) {
