@@ -35,6 +35,10 @@ export class CreateUseCase extends UseCase {
     });
 
     this.encryptPassword();
+    const token = this.firstTimeAccount(newUser.name, newUser.password);
+    if (!this.user.auth) {
+      this.user.auth = token;
+    }
 
     try {
       await this.repository.save(this.user);
@@ -42,6 +46,24 @@ export class CreateUseCase extends UseCase {
       console.log(e);
     }
     return this.user;
+  }
+
+  private firstTimeAccount(name: string, password: string) {
+    const auth = new AuthenticateUseCase(
+      new AuthRepository(),
+      this.user,
+      new Auth(),
+    );
+    const user = {
+      username: name,
+      password,
+    };
+
+    try {
+      return auth.verifyToken();
+    } catch (e) {
+      return e;
+    }
   }
 
   private encryptPassword(): void {
