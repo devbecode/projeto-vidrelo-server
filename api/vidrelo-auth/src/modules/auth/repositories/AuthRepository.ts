@@ -46,13 +46,13 @@ export class AuthRepository implements IAuthRepository {
     // );
   }
 
-  async findByUsername(user: User): Promise<void> {
+  async findByEmail(user: User): Promise<void> {
     const record = await getRepository(UserEntity).findOne({
-      where: { name: user.name, status: USER_STATUS.ACTIVE },
+      where: { email: user.email, status: USER_STATUS.ACTIVE },
     });
 
     if (!record) {
-      throw new AppError(`No user was found to name ${user.name}`);
+      throw new AppError(`No user was found to email ${user.email}`);
     }
 
     Object.assign(user, record);

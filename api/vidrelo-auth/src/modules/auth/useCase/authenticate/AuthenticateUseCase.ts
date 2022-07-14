@@ -22,9 +22,9 @@ export class AuthenticateUseCase {
   ) {}
 
   async authenticate(data: IUserToAuthDTO): Promise<IAuthenticatedDTO> {
-    Object.assign(this.user, { name: data.username, ...data });
+    Object.assign(this.user, { name: data.email, ...data });
 
-    await this.authRepository.findByUsername(this.user);
+    await this.authRepository.findByEmail(this.user);
     this.checkPassword(data.password);
     this.user.auth = this.auth;
 
@@ -33,9 +33,7 @@ export class AuthenticateUseCase {
 
   private checkPassword(inputPassword: string): void {
     if (!compareSync(inputPassword, this.user.password)) {
-      throw new AppError(
-        `Your username or password was wrong. Please try again`,
-      );
+      throw new AppError(`Your email or password was wrong. Please try again`);
     }
   }
 

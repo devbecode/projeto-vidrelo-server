@@ -5,12 +5,12 @@ import { AuthenticateUseCase } from './AuthenticateUseCase';
 
 export class AuthenticateController {
   async authenticate(request: Request, response: Response): Promise<Response> {
-    const { username, password } = request.body;
+    const { email, password } = request.body;
 
     const authenticated = await container
       .resolve(AuthenticateUseCase)
       .authenticate({
-        username,
+        email,
         password,
       });
 
