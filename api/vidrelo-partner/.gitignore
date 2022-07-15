@@ -3,4 +3,3 @@ dist
 logs
 .env
 coverage
-ormconfig.js

@@ -3,5 +3,3 @@ dist
 logs
 .env
 coverage
-/.vscode/
-ormconfig.js
