@@ -8,9 +8,9 @@ const checkTelephone = (telephone: string) => {
   // eslint-disable-next-line prefer-regex-literals
   const patternTelephone = new RegExp(/^[0-9]+$/);
 
-  if (!patternTelephone.test(telephone)) {
-    throw new AppError(`The telephone ${telephone} must be only numbers`);
-  }
+  // if (!patternTelephone.test(telephone)) {
+  //   throw new AppError(`The telephone ${telephone} must be only numbers`);
+  // }
 };
 
 const formatDate = (date: string) => {
