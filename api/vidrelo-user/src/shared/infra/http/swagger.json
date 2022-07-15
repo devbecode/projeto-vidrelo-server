@@ -37,24 +37,7 @@
                 "$ref": "#/components/schemas/UserRequestToCreate"
               },
               "examples": {
-                "minimun example insert user employee": {
-                  "value": {
-                    "name": "Felipe Luiz",
-                    "email": "felipeluiz2@gmail.com",
-                    "telephone": "31933745679",
-                    "profile": "employee"
-                  }
-                },
-                "minimun example insert user client": {
-                  "value": {
-                    "name": "Peter",
-                    "email": "felipeluiz2@gmail.com",
-                    "telephone": "31933745679",
-                    "profile": "client",
-                    "password": "123456"
-                  }
-                },
-                "full example insert user": {
+                "example insert user": {
                   "value": {
                     "name": "Fulano Ciclano",
                     "email": "fulanociclano2@gmail.com",
@@ -67,6 +50,14 @@
                     "number": "289",
                     "complement": "Nice House",
                     "city": "Belo Horizonte"
+                  }
+                },
+                "minimun example insert user employee": {
+                  "value": {
+                    "name": "Felipe Luiz",
+                    "email": "felipeluiz2@gmail.com",
+                    "telephone": "31933745679",
+                    "profile": "employee"
                   }
                 }
               }
@@ -84,6 +75,15 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "The user with this email already exists"
+          },
+          "400": {
+            "description": "The password can not be less than 8 characters"
+          },
+          "400(another)": {
+            "description": "Email is not valid"
           }
         }
       }
