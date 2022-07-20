@@ -31,7 +31,7 @@ export class CreateUseCase {
     await this.checkIfExists();
 
     Object.assign(this.user, {
-      id: uuid(),
+      id: newUser.optionalId ? newUser.optionalId : uuid(),
       name: newUser.name,
       profile: newUser.profile,
       salt: this.generateSalt(),
