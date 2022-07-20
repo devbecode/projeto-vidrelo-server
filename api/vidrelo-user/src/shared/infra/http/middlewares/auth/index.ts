@@ -16,6 +16,7 @@ const checkToken = (
 ) => {
   const authToken = request.headers.authorization;
   const { profile } = request.body;
+  const secretKey = process.env.SECRET_KEY;
 
   if (
     profile === USER_PROFILE.CLIENT &&
@@ -32,7 +33,7 @@ const checkToken = (
     try {
       const [, token] = authToken.split(' ');
 
-      verify(token, process.env.SECRET_KEY);
+      verify(token, secretKey);
       return next();
     } catch (error) {
       throw new AppError(`Invalid token`, 403);
