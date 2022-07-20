@@ -60,7 +60,7 @@ export class AuthenticateUseCase {
 
   public async verifyToken(): Promise<IAuthenticatedDTO> {
     const exists = await this.findTokenByUserId();
-    if (!exists || (exists && this.isExpired())) {
+    if (!exists) {
       this.generateToken();
       this.save();
     }
