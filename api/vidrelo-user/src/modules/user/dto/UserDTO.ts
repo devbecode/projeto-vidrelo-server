@@ -1,6 +1,7 @@
 import { User, USER_PROFILE } from '../domain/User';
 
 export interface ICreateUserDTO {
+  optionalId?: string;
   name: string;
   email: string;
   telephone: string;

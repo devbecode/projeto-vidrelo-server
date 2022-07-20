@@ -7,9 +7,9 @@ export enum USER_STATUS {
 
 export class User {
   public id: string;
-  public status: string;
-  public email: string;
-  public password: string;
-  public created_at: string;
-  public auth: Auth;
+  public status?: string;
+  public email?: string;
+  public password?: string;
+  public created_at?: string;
+  public auth?: Auth;
 }

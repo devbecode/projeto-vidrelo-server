@@ -16,7 +16,6 @@ const changePassword = new ChangePasswordController();
 
 userRoutes.post('/first-password', changePassword.changePassword);
 
-userRoutes.post('/user-form', createController.create);
 userRoutes.post('/user', checkToken, createController.create);
 userRoutes.get('/users', checkToken, listController.listAll);
 userRoutes.get('/user/:id', checkToken, listController.fyndById);
