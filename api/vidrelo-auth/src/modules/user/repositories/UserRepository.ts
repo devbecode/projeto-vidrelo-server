@@ -2,7 +2,7 @@ import { getRepository, Repository } from 'typeorm';
 
 import { AppError } from '@shared/error/AppError';
 
-import { User } from '../domain/User';
+import { USER_STATUS, User } from '../domain/User';
 import { UserEntity } from '../infra/entities/UserEntity';
 import { IUserRepository } from './IUserRepository';
 
@@ -41,5 +41,16 @@ export class UserRepository implements IUserRepository {
     }
 
     return true;
+  }
+
+  public async inactiveById(id: string): Promise<void> {
+    const { affected } = await this.repository.update(
+      { id },
+      { status: USER_STATUS.INACTIVE },
+    );
+
+    if (!affected) {
+      throw new AppError(`No user was updated to id ${id}`, 500);
+    }
   }
 }
