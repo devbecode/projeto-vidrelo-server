@@ -43,15 +43,16 @@ export class AuthenticateUseCase {
 
   private generateToken(): void {
     const secret = process.env.SECRET_KEY;
+    const expirationTime = process.env.EXPIRATION_TIME;
     const token = sign({}, secret, {
       subject: String(this.user.id),
-      jwtid: String(process.env.COMPANY_ID),
+      expiresIn: String(expirationTime),
     });
 
     this.user.auth = {
       id: uuid(),
       access_token: token,
-      expires_in: '24',
+      expires_in: expirationTime,
       created_at: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
       user_id: this.user.id,
     };
