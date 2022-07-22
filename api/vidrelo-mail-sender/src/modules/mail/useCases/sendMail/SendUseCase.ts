@@ -1,3 +1,4 @@
+import { hashSync } from 'bcrypt';
 import { inject, injectable } from 'tsyringe';
 
 import { Mail } from '@modules/mail/domain/Mail';
@@ -16,6 +17,17 @@ export class SendUseCase {
   ) {}
 
   public async send(data: Mail): Promise<void> {
+    if (data.template_type === 'PasswordRecoveryTemplate') {
+      const paramsValues = Object.values(data.params);
+      const paramIndex = Object.keys(data.params);
+      const indexMail = paramIndex.indexOf('user_email');
+      if (indexMail < 0) {
+        throw new AppError(`Não existe nenhum campo com o email do usuário`);
+      }
+      const userMail = paramsValues[indexMail];
+      // eslint-disable-next-line no-param-reassign
+      data.params.encrypted_mail = hashSync(userMail as string, 12);
+    }
     Object.assign(this.mail, data);
 
     this.mail.provider = this.makeProviderByType();
