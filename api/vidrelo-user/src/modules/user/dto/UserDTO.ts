@@ -35,9 +35,9 @@ export interface IFilterUsersDTO {
 
 export interface IUpdateUserDTO {
   id: string;
-  name: string;
-  password: string;
-  telephone: string;
+  name?: string;
+  password?: string;
+  telephone?: string;
   profile: string;
   cep?: string;
   state?: string;

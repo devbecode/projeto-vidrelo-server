@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 import { Request, Response } from 'express';
 import { container } from 'tsyringe';
 
@@ -10,13 +11,25 @@ export class UpdateController {
     response: Response,
   ): Promise<Response> {
     const { id } = request.params;
-    const { name, password, telephone, profile } = request.body;
+    const { profile } = request.body;
 
-    // eslint-disable-next-line prefer-const
-    let { cep, state, district, street, number, complement, city } =
-      request.body;
+    let {
+      name,
+      password,
+      telephone,
+      cep,
+      state,
+      district,
+      street,
+      number,
+      complement,
+      city,
+    } = request.body;
 
     if (
+      !name ||
+      !password ||
+      !telephone ||
       !cep ||
       !state ||
       !district ||
@@ -29,8 +42,10 @@ export class UpdateController {
         const userBeforeUpdate = await container
           .resolve(ListUseCase)
           .findById(id);
-        // eslint-disable-next-line prefer-const
         let address = {
+          name,
+          password,
+          telephone,
           cep,
           state,
           district,
@@ -47,6 +62,15 @@ export class UpdateController {
             address[key] === ''
           ) {
             switch (key) {
+              case 'name':
+                address[key] = userBeforeUpdate.name;
+                break;
+              case 'password':
+                address[key] = userBeforeUpdate.password;
+                break;
+              case 'telephone':
+                address[key] = userBeforeUpdate.telephone;
+                break;
               case 'cep':
                 address[key] = userBeforeUpdate.cep;
                 break;
@@ -74,6 +98,9 @@ export class UpdateController {
           }
         });
 
+        name = address.name;
+        password = address.password;
+        telephone = address.telephone;
         cep = address.cep;
         state = address.state;
         district = address.district;

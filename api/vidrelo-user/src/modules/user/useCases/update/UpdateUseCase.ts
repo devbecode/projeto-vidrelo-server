@@ -21,6 +21,12 @@ export class UpdateUseCase {
   ) {}
 
   public async updateById(data: IUpdateUserDTO): Promise<User> {
+    if (!data.id) {
+      throw new AppError(`No id was sent as parameter.`);
+    }
+    if (!data.profile) {
+      throw new AppError(`No user profile was defined.`);
+    }
     this.user.id = data.id;
     this.user.profile = data.profile;
 
