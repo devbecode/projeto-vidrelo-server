@@ -54,7 +54,7 @@ export class UpdateController {
           complement,
           city,
         };
-        console.log(address);
+
         Object.keys(address).forEach(key => {
           if (
             address[key] === undefined ||
