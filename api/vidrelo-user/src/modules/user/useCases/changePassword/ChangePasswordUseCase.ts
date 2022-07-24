@@ -5,6 +5,7 @@ import { STATUS_USER, User } from '@modules/user/domain/User';
 import { IChangePasswordDTO } from '@modules/user/dto/UserDTO';
 import { IUserRepository } from '@modules/user/repositories/IUserRepository';
 import { AppError } from '@shared/error/AppError';
+import { SQS_OPERATIONS } from '@shared/infra/queue/SqsProvider';
 
 @injectable()
 export class ChangePasswordUseCase {
