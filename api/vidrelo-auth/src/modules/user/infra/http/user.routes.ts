@@ -9,6 +9,7 @@ const userController = new CreateController();
 const userUpateController = new UpdateController();
 
 userRoutes.post('/createUser', userController.create);
+userRoutes.post('/updateUserPassword', userUpateController.updatePasswordById);
 userRoutes.delete(
   '/deleteUser/:id',
   checkToken,

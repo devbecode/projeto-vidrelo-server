@@ -29,4 +29,11 @@ export class UpdateUseCase {
 
     await this.repository.inactiveById(this.user.id);
   }
+  public async updatePasswordById(id: string, password: string): Promise<void> {
+    this.user.id = id;
+    this.user.password = password;
+    await this.checkIfExists();
+
+    await this.repository.updatePasswordById(this.user);
+  }
 }
