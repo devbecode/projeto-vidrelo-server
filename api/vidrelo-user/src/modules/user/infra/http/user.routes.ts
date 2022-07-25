@@ -19,6 +19,7 @@ userRoutes.post('/first-password', changePassword.changePassword);
 userRoutes.post('/user', checkToken, createController.create);
 userRoutes.get('/users', checkToken, listController.listAll);
 userRoutes.get('/user/:id', checkToken, listController.fyndById);
+userRoutes.get('/userMail/:email', checkToken, listController.fyndByEmail);
 userRoutes.patch('/user/:id', checkToken, updateController.updateById);
 userRoutes.delete('/user/:id', checkToken, updateController.inactiveById);
 
