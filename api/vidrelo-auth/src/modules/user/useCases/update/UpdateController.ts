@@ -1,8 +1,10 @@
-import { Request, Response } from 'express';
 import { hashSync } from 'bcrypt';
+import { Request, Response } from 'express';
 import { container } from 'tsyringe';
 
 import { UpdateUseCase } from './UpdateUseCase';
+
+import { AuthenticateUseCase } from '../../../auth/useCase/authenticate/AuthenticateUseCase';
 
 export class UpdateController {
   public async inactiveById(
@@ -20,10 +22,17 @@ export class UpdateController {
     request: Request,
     response: Response,
   ): Promise<Response> {
-    const { id, password } = request.body;
-    const updateUseCase = container.resolve(UpdateUseCase);
-    await updateUseCase.updatePasswordById(id, password);
+    const { id, email, password } = request.body;
+    const hashedPassword = hashSync(password, 12);
 
-    return response.json({ result: 'User updated' });
+    const updateUseCase = container.resolve(UpdateUseCase);
+    await updateUseCase.updatePasswordById(id, hashedPassword);
+
+    const authUseCase = container.resolve(AuthenticateUseCase);
+    console.log(password);
+    console.log(email);
+    const responseAuth = await authUseCase.authenticate({ email, password });
+
+    return response.json({ responseAuth });
   }
 }

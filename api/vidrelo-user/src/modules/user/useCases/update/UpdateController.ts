@@ -1,7 +1,7 @@
 /* eslint-disable prefer-const */
 import { Request, Response } from 'express';
 import { container } from 'tsyringe';
-
+import { hashSync } from 'bcrypt';
 import { ListUseCase } from '../listUsers/ListUseCase';
 import { UpdateUseCase } from './UpdateUseCase';
 
@@ -25,7 +25,9 @@ export class UpdateController {
       complement,
       city,
     } = request.body;
-
+    if (password) {
+      password = hashSync(password, 12);
+    }
     if (
       !name ||
       !password ||
