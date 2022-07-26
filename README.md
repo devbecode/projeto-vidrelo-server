@@ -17,7 +17,7 @@
   DB_PASSWORD = root
   ORM_PATH = ./src/
 
-  SERVER_PORT = //porta definida no arquivo server.ts
+  SERVER_PORT = //port defined at server.ts file
   SECRET_KEY = //secret key from jswon webtoken(use the same jwt to all APIs)
 ```
 
@@ -27,7 +27,7 @@
   yarn or yarn install
 ```
 
-- Creation of the ormconfig.js file using this code (if you don't have it already):
+- Creation of the ormconfig.js file using this code (check if you don't have it already):
 
 ```bash
   module.exports = {
@@ -52,7 +52,7 @@
   yarn start:dev
 ```
 
-- Finally just run the migrations to create the database's tables \*(if you don't have them already):
+- Finally just run the migrations to create the database's tables(Isn't necessary if you already runt it before):
 
 ```bash
   yarn typeorm migration:run
