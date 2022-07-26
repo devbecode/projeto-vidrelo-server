@@ -27,7 +27,7 @@
   yarn or yarn install
 ```
 
-- Creation of the ormconfig.js file using this code:
+- Creation of the ormconfig.js file using this code (if you don't have it already):
 
 ```bash
   module.exports = {
