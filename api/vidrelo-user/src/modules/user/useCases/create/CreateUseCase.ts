@@ -16,6 +16,7 @@ import {
   checkTelephone,
   formatDate,
 } from '@shared/utils';
+import { SQS_OPERATIONS } from '@shared/infra/queue/SqsProvider';
 
 @injectable()
 export class CreateUseCase {
