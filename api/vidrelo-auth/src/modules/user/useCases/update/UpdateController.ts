@@ -29,8 +29,6 @@ export class UpdateController {
     await updateUseCase.updatePasswordById(id, hashedPassword);
 
     const authUseCase = container.resolve(AuthenticateUseCase);
-    console.log(password);
-    console.log(email);
     const responseAuth = await authUseCase.authenticate({ email, password });
 
     return response.json({ responseAuth });
