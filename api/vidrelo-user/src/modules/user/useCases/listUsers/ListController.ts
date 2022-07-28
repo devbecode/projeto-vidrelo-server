@@ -25,4 +25,13 @@ export class ListController {
     const user = await container.resolve(ListUseCase).findById(id);
     return response.json(user);
   }
+  public async fyndByEmail(
+    request: Request,
+    response: Response,
+  ): Promise<Response> {
+    const { email } = request.params;
+
+    const user = await container.resolve(ListUseCase).findByEmail(email);
+    return response.json(user);
+  }
 }

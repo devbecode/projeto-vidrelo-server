@@ -15,9 +15,11 @@ const checkToken = (
   // eslint-disable-next-line consistent-return
 ) => {
   const authToken = request.headers.authorization;
-  const { profile } = request.body;
+  const { profile, forgotPassword } = request.body;
   const secretKey = process.env.SECRET_KEY;
-
+  if (forgotPassword) {
+    return next();
+  }
   if (
     profile === USER_PROFILE.CLIENT &&
     request.originalUrl === PUBLIC_ROUTES.CREATE_USER

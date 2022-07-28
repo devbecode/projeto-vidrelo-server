@@ -31,10 +31,21 @@ export class ListUseCase {
 
     return this.user;
   }
+  public async findByEmail(email: string): Promise<User> {
+    this.user.email = email;
+    await this.checkIfExistsByEmail();
+
+    return this.user;
+  }
 
   private async checkIfExists(): Promise<void> {
     if (!(await this.repository.findById(this.user))) {
       throw new AppError(`No user was found to id ${this.user.id}`);
+    }
+  }
+  private async checkIfExistsByEmail(): Promise<void> {
+    if (!(await this.repository.findByEmail(this.user))) {
+      throw new AppError(`No user was found to email ${this.user.email}`);
     }
   }
 }

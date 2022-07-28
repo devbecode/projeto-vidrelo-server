@@ -52,29 +52,29 @@ const checkProfile = (profile: string): void => {
 };
 
 const checkCep = (cep: string) => {
-  // eslint-disable-next-line prefer-regex-literals
-  const patternCep = new RegExp(/[0-9]{8}/);
-  if (!patternCep.test(cep)) {
-    throw new AppError(
-      `The cep ${cep} must be only numbers and be like 8 characters`,
-    );
+  if (cep) {
+    // eslint-disable-next-line prefer-regex-literals
+    const patternCep = new RegExp(/^(\d{5})-(\d{3})/);
+    if (!patternCep.test(cep)) {
+      throw new AppError(`The cep ${cep} structre must be 99999-999`);
+    }
   }
 };
 
 const checkAddress = (address: IAddressClientProfile) => {
-  if (
-    !address.cep ||
-    !address.city ||
-    !address.district ||
-    !address.number ||
-    !address.state ||
-    !address.street
-  ) {
-    throw new AppError(
-      `The address must have cep, city, complement, district, number, state, street`,
-      400,
-    );
-  }
+  // if (
+  //   !address.cep ||
+  //   !address.city ||
+  //   !address.district ||
+  //   !address.number ||
+  //   !address.state ||
+  //   !address.street
+  // ) {
+  //   throw new AppError(
+  //     `The address must have cep, city, complement, district, number, state, street`,
+  //     400,
+  //   );
+  // }
 
   checkCep(address.cep);
 };

@@ -60,7 +60,7 @@ export class AuthenticateUseCase {
 
   public async verifyToken(): Promise<IAuthenticatedDTO> {
     const exists = await this.findTokenByUserId();
-    if (!exists) {
+    if (!exists || (exists && this.isExpired())) {
       this.generateToken();
       this.save();
     }
@@ -75,21 +75,18 @@ export class AuthenticateUseCase {
   }
 
   private isExpired(): boolean {
-    const today = moment(new Date(), 'YYYY-mm-dd').format(
+    const oneDayInMilisenconds = 86400000;
+    const presentTime = moment(new Date(), 'YYYY-mm-dd').format(
       'YYYY-MM-DD HH:mm:ss',
     );
 
-    const expires_in = moment(this.user.auth.created_at, 'YYYY-mm-dd').format(
+    const createdAt = moment(this.user.created_at).format(
       'YYYY-MM-DD HH:mm:ss',
     );
 
-    const ms = moment(today).diff(expires_in);
-    const duration = moment.duration(moment(today).diff(expires_in)).asHours();
-    const validation = parseInt(
-      `${Math.floor(duration)}${moment.utc(ms).format('mm')}`,
-    );
+    const passedTimeInMilisenconds = moment(presentTime).diff(createdAt);
 
-    return validation >= 2400;
+    return passedTimeInMilisenconds >= oneDayInMilisenconds;
   }
 
   private async save(): Promise<void> {

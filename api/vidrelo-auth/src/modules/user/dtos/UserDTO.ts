@@ -10,3 +10,7 @@ export interface IChangePassword {
   id: string;
   password: string;
 }
+export interface ICredentials {
+  email: string;
+  emailEncrypted: string;
+}
